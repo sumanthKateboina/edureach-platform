@@ -1,5 +1,5 @@
 import { topRecruiters, deptPlacements, images } from "../data/content.ts";
-import { Award, CheckCircle2, Star } from "lucide-react";
+import { Award, Star } from "lucide-react";
 
 export default function HiringStatsSection() {
   return (
