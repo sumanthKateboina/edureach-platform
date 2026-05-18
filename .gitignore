@@ -1,0 +1,14 @@
+# Dependency directories (ignore node_modules anywhere in the tree)
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/build/
+
+# Local configuration files
+**/.env
+**/.env.local
+
+# Operating System and Logs
+.DS_Store
+*.log
