@@ -15,20 +15,20 @@ export default function CallPopup({ isOpen, onClose }: CallPopupProps) {
   const [phone, setPhone] = useState(user?.phone || "");
   const [course, setCourse] = useState(vapiFormContent.courses[0] || "");
   const [topic, setTopic] = useState(vapiFormContent.topics[0] || "");
-  const [status, setStatus] = useState<"idle" | "calling" | "success" | "failed">("idle");
+  const [status, setStatus] = useState<"idle" | "calling" | "success" | "callback" | "failed">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone) {
+    const normalizedPhone = phone.replace(/[\s()-]/g, "");
+    if (!normalizedPhone) {
       toast.error("Please enter a valid phone number.");
       return;
     }
     
-    // Quick sanitize validation (must start with +)
-    if (!phone.startsWith("+")) {
+    if (!/^\+[1-9]\d{7,14}$/.test(normalizedPhone) && !/^[6-9]\d{9}$/.test(normalizedPhone)) {
       toast.error("Phone number must include country code (e.g., +919876543210)");
       return;
     }
@@ -37,14 +37,19 @@ export default function CallPopup({ isOpen, onClose }: CallPopupProps) {
     setErrorMessage("");
 
     try {
-      await initiateCall({ phone, course, topic });
-      setStatus("success");
-      toast.success("AI counselor is calling you!");
+      const result = await initiateCall({ phone: normalizedPhone, course, topic });
+      if (result.data?.fallback) {
+        setStatus("callback");
+        toast.success("Callback request received.");
+      } else {
+        setStatus("success");
+        toast.success("AI counselor is calling you!");
+      }
     } catch (err: any) {
       console.error("Vapi trigger failed:", err);
       setStatus("failed");
-      setErrorMessage(err.response?.data?.message || "Failed to trigger outbound call.");
-      toast.error("Call dispatch failed.");
+      setErrorMessage(err.response?.data?.message || err.message || "We could not start the call right now.");
+      toast.error("Could not start the call.");
     }
   };
 
@@ -103,7 +108,7 @@ export default function CallPopup({ isOpen, onClose }: CallPopupProps) {
                   className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-900 focus:border-maroon focus:ring-1 focus:ring-maroon outline-none transition-all duration-200"
                 />
                 <span className="text-[10px] text-gray-400 font-medium">
-                  * Must include "+" and country code (e.g. +91 for India).
+                  * Use country code. Indian numbers are saved as callback requests if live voice dispatch is unavailable.
                 </span>
               </div>
 
@@ -198,6 +203,31 @@ export default function CallPopup({ isOpen, onClose }: CallPopupProps) {
           </div>
         )}
 
+        {/* Callback fallback state */}
+        {status === "callback" && (
+          <div className="py-8 flex flex-col items-center justify-center space-y-6 text-center">
+            <div className="rounded-full bg-amber-100 text-amber-600 p-5 border border-amber-50 flex items-center justify-center">
+              <CheckCircle2 className="h-10 w-10" />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="font-heading text-lg font-bold text-gray-900">
+                Callback Requested
+              </h3>
+              <p className="font-body text-xs text-gray-500 leading-relaxed max-w-xs">
+                Your number has been received. Our admissions team will contact you from the college line because instant voice dispatch is not available for this number.
+              </p>
+            </div>
+
+            <button
+              onClick={resetForm}
+              className="w-full rounded-xl bg-gray-900 py-3 text-sm font-bold text-white hover:bg-gray-800 transition-all duration-200"
+            >
+              Done
+            </button>
+          </div>
+        )}
+
         {/* Failed state */}
         {status === "failed" && (
           <div className="py-8 flex flex-col items-center justify-center space-y-6 text-center">
@@ -210,7 +240,7 @@ export default function CallPopup({ isOpen, onClose }: CallPopupProps) {
                 Call Failed
               </h3>
               <p className="font-body text-xs text-gray-500 leading-relaxed max-w-xs">
-                {errorMessage || "We encountered an issue dispatcher the voice agent. Verify your credentials/API balance."}
+                {errorMessage || "We could not start the voice call right now. Please retry in a moment."}
               </p>
             </div>
 

@@ -27,10 +27,12 @@ export const startCall = async (req: Request, res: Response, next: NextFunction)
       userEmail: user.email
     });
 
-    res.status(200).json({
+    const statusCode = result.fallback ? 202 : 200;
+
+    res.status(statusCode).json({
       success: true,
-      message: "Call initiated. You will receive a call shortly.",
-      data: { callId: result.id, status: result.status },
+      message: result.message || "Call initiated. You will receive a call shortly.",
+      data: { callId: result.id, status: result.status, fallback: Boolean(result.fallback) },
     });
   } catch (error) {
     next(error);
