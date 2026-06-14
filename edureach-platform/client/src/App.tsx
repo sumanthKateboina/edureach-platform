@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext.tsx";
 import Home from "./pages/Home.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
+import AdminDashboard from "./pages/AdminDashboard.tsx";
 import { Toaster } from "react-hot-toast";
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
         
         {/* Rich Popups Toast Notifications */}

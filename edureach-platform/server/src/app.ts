@@ -8,6 +8,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.ts";
 import errorHandler from "./middleware/error-handler.middleware.ts";
 import chatRoutes from "./routes/chat.routes.ts";
+import adminRoutes from "./routes/admin.routes.ts";
 
 const app: Application = express();
 
@@ -29,6 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/vapi", vapiRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ success: false, message: "Route not found." });
