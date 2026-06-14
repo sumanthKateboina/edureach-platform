@@ -23,12 +23,12 @@ export default function Login() {
     setLoading(true);
     try {
       const data = await loginUser({ email, password });
-      login(data.token);
+      login(data.token, data.user);
       toast.success("Welcome back! Login successful.");
       navigate("/");
     } catch (err: any) {
       console.error("Login failure:", err);
-      toast.error(err.response?.data?.message || "Invalid credentials. Please try again.");
+      toast.error(err.response?.data?.message || err.message || "Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
     }

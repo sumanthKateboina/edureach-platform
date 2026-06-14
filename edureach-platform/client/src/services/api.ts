@@ -1,7 +1,10 @@
 import axios from "axios";
 
+const API_BASE_URL = ((import.meta.env.VITE_API_URL as string) || "http://localhost:5000/api").replace(/\/$/, "");
+
 const API = axios.create({
-  baseURL: (import.meta.env.VITE_API_URL as string) || "http://localhost:5000/api",
+  baseURL: API_BASE_URL,
+  timeout: 8000,
 });
 
 API.interceptors.request.use((config) => {
@@ -11,5 +14,17 @@ API.interceptors.request.use((config) => {
   }
   return config;
 });
+
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.code === "ECONNABORTED") {
+      error.message = "The server is taking too long to respond. Please try again in a moment.";
+    } else if (!error.response) {
+      error.message = "Cannot reach the admission server right now. Please check the backend deployment.";
+    }
+    return Promise.reject(error);
+  },
+);
 
 export default API;

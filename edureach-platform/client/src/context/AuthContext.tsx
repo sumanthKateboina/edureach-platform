@@ -6,12 +6,15 @@ interface User {
   name: string;
   email: string;
   phone?: string;
+  courseInterest?: string;
+  qualification?: string;
+  city?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (token: string) => void;
+  login: (token: string, user?: User) => void;
   logout: () => void;
 }
 
@@ -36,8 +39,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = (token: string) => {
+  const login = (token: string, userData?: User) => {
     localStorage.setItem("token", token);
+    if (userData) {
+      setUser(userData);
+      return;
+    }
+
     getMe()
       .then((data) => setUser(data.user))
       .catch(() => {

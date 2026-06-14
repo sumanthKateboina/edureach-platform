@@ -9,12 +9,13 @@ const start = async (): Promise<void> => {
     // 1. Connect Mongoose (for users collection)
     await connectDB();
 
-    // 2. Index knowledge base if not already done
-    //    First run: loads .txt → splits → embeds → stores in MongoDB
-    //    Subsequent runs: sees data exists, skips
-    await initializeKnowledgeBase();
+    // Warm the knowledge base in the background so auth routes are available quickly.
+    const warmKnowledgeBase = initializeKnowledgeBase().catch((error) => {
+      console.warn("Knowledge base initialization skipped:", error);
+    });
+    void warmKnowledgeBase;
 
-    // 3. Start Express
+    // Start Express
     app.listen(PORT, () => {
       console.log(` EduReach Server is running!`);
       console.log(` URL: http://localhost:${PORT}`);

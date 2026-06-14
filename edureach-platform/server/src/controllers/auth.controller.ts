@@ -6,10 +6,10 @@ import { generateToken } from "../utils/jwt.util.ts";
 // POST /api/auth/register — Public — Create new account
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, courseInterest, qualification, city } = req.body;
 
-    if (!name || !email || !password) {
-      res.status(400).json({ success: false, message: "Name, email, and password are required." });
+    if (!name || !email || !password || !courseInterest || !qualification || !city) {
+      res.status(400).json({ success: false, message: "Name, email, password, course, qualification, and city are required." });
       return;
     }
 
@@ -30,6 +30,9 @@ export const register = async (req: Request, res: Response, next: NextFunction):
       email: email.toLowerCase(),
       password: hashedPassword,
       phone: phone || null,
+      courseInterest,
+      qualification,
+      city,
     });
 
     const token = generateToken({ userId: user._id.toString(), email: user.email });
@@ -39,7 +42,15 @@ export const register = async (req: Request, res: Response, next: NextFunction):
       message: "Account created successfully.",
       data: {
         token,
-        user: { id: user._id, name: user.name, email: user.email, phone: user.phone },
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          courseInterest: user.courseInterest,
+          qualification: user.qualification,
+          city: user.city,
+        },
       },
     });
   } catch (error) {
@@ -76,7 +87,15 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
       message: "Login successful.",
       data: {
         token,
-        user: { id: user._id, name: user.name, email: user.email, phone: user.phone },
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          courseInterest: user.courseInterest,
+          qualification: user.qualification,
+          city: user.city,
+        },
       },
     });
   } catch (error) {
@@ -108,6 +127,9 @@ export const getMe = async (req: Request, res: Response, next: NextFunction): Pr
           name: user.name,
           email: user.email,
           phone: user.phone,
+          courseInterest: user.courseInterest,
+          qualification: user.qualification,
+          city: user.city,
           created_at: user.created_at,
         },
       },

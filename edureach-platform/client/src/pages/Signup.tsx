@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext.tsx";
 import { registerUser } from "../services/auth.service.ts";
 import { useNavigate, Link } from "react-router-dom";
-import { GraduationCap, Mail, Lock, User, Phone, Loader2, ArrowRight } from "lucide-react";
+import { GraduationCap, Mail, Lock, User, Phone, Loader2, ArrowRight, BookOpen, MapPin, School } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 export default function Signup() {
@@ -12,12 +12,15 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [courseInterest, setCourseInterest] = useState("");
+  const [qualification, setQualification] = useState("");
+  const [city, setCity] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !courseInterest || !qualification || !city) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -30,13 +33,21 @@ export default function Signup() {
 
     setLoading(true);
     try {
-      const data = await registerUser({ name, email, password, phone: phone || undefined });
-      login(data.token);
-      toast.success("Welcome to EduReach! Registration successful.");
+      const data = await registerUser({
+        name,
+        email,
+        password,
+        phone: phone || undefined,
+        courseInterest,
+        qualification,
+        city,
+      });
+      login(data.token, data.user);
+      toast.success("Admission profile submitted successfully.");
       navigate("/");
     } catch (err: any) {
       console.error("Registration failure:", err);
-      toast.error(err.response?.data?.message || "Registration failed. Email may already exist.");
+      toast.error(err.response?.data?.message || err.message || "Registration failed. Email may already exist.");
     } finally {
       setLoading(false);
     }
@@ -87,7 +98,7 @@ export default function Signup() {
               Get Started with EduReach
             </h1>
             <p className="text-xs text-gray-500">
-              Create a free student profile to unlock restricted dashboards.
+              Submit your admission details and unlock student dashboards.
             </p>
           </div>
 
@@ -150,6 +161,64 @@ export default function Signup() {
               </span>
             </div>
 
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
+                  Course Interest
+                </label>
+                <div className="relative">
+                  <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <select
+                    required
+                    value={courseInterest}
+                    onChange={(e) => setCourseInterest(e.target.value)}
+                    className="w-full appearance-none rounded-xl border border-gray-200 pl-12 pr-4 py-3 text-sm font-medium text-gray-900 focus:border-maroon focus:ring-1 focus:ring-maroon outline-none transition-all duration-200 bg-white"
+                  >
+                    <option value="">Select course</option>
+                    <option value="B.Tech Computer Science">B.Tech Computer Science</option>
+                    <option value="B.Tech Information Technology">B.Tech Information Technology</option>
+                    <option value="B.Tech Electronics">B.Tech Electronics</option>
+                    <option value="MBA">MBA</option>
+                    <option value="M.Tech">M.Tech</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
+                  Qualification
+                </label>
+                <div className="relative">
+                  <School className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Class 12 / Degree"
+                    value={qualification}
+                    onChange={(e) => setQualification(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 pl-12 pr-4 py-3 text-sm font-medium text-gray-900 focus:border-maroon focus:ring-1 focus:ring-maroon outline-none transition-all duration-200"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
+                City
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  required
+                  placeholder="Hyderabad"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 pl-12 pr-4 py-3 text-sm font-medium text-gray-900 focus:border-maroon focus:ring-1 focus:ring-maroon outline-none transition-all duration-200"
+                />
+              </div>
+            </div>
+
             {/* Password Field */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
@@ -178,7 +247,7 @@ export default function Signup() {
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 <>
-                  Register Profile
+                  Submit Admission Form
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}

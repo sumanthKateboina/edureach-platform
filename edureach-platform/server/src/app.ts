@@ -1,11 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-// temporary debug - remove after verifying env values
-console.log("VAPI_API_KEY loaded:", Boolean(process.env.VAPI_API_KEY));
-console.log("VAPI_ASSISTANT_ID loaded:", Boolean(process.env.VAPI_ASSISTANT_ID));
-console.log("VAPI_PHONE_NUMBER_ID loaded:", Boolean(process.env.VAPI_PHONE_NUMBER_ID));
-
 import vapiRoutes from "./routes/vapi.routes.ts";
 import express from "express";
 import type { Application, Request, Response } from "express";
@@ -15,6 +10,10 @@ import errorHandler from "./middleware/error-handler.middleware.ts";
 import chatRoutes from "./routes/chat.routes.ts";
 
 const app: Application = express();
+
+app.get("/api/health", (_req: Request, res: Response) => {
+  res.status(200).json({ success: true, message: "EduReach API is healthy." });
+});
 
 app.use(
   cors({
